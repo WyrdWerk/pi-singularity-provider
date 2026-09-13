@@ -62,7 +62,7 @@ Fetch the catalog instead of hardcoding models; it is the source of truth for li
 Rules for interpreting it:
 
 - **Filter on `endpoint == "/v1/chat/completions"` exactly.** A model may also serve `/v1/responses` or `/v1/images/generations`; entries without a chat-completions capability (e.g. image-only models) are not chat models — do not register them as such.
-- **Pricing strings parse to floats** (rates per million tokens). Running cost estimate = tokens × rate; see §5 for the authoritative figure.
+- **Pricing strings parse to floats** (USD per million tokens). Running cost estimate = `(input_tokens / 1_000_000 × input_rate) + (output_tokens / 1_000_000 × output_rate)`; see §5 for the authoritative figure.
 - **Refresh strategy** (what the pi extension does): ship/embed a snapshot so startup is instant, refresh from the API asynchronously on session start, cache the result on disk, and let live values win for `context_window`, `maximum_output_tokens`, and pricing while keeping your own display names and compatibility flags. Merge by model `id`; never duplicate.
 
 ## 3. Reasoning (thinking levels)
@@ -117,7 +117,7 @@ Receipts resolve only for the owning account (404 otherwise). Poll briefly if `u
 
 Two complementary mechanisms:
 
-- **Running estimate:** accumulate `usage` from each response × the catalog rates from §2. This is what a UI footer should show live.
+- **Running estimate:** accumulate each response's `usage` priced at the catalog rates from §2 — `(input_tokens / 1_000_000 × input_rate) + (output_tokens / 1_000_000 × output_rate)`. This is what a UI footer should show live.
 - **Authoritative:** the receipt's `total_cost_usd` (§4) — settled, gateway-computed, and the number to trust for reporting. It also captures gateway-side adjustments a local estimate can't see.
 
 ## 6. Checklist for agent implementers
