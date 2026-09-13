@@ -24,7 +24,7 @@ _Live catalog metadata — context windows, output limits, exact pricing — plu
 
 `pi install <source>` downloads the package into pi's agent directory, reads the `"pi": {"extensions": ["./index.ts"]}` manifest in its `package.json`, and adds the source to your pi settings — so the extension loads automatically on every start, no `-e` flag needed. Manage it later with `pi update pi-singularity-provider`, `pi remove pi-singularity-provider`, and `pi list`. Add `-l` to any install to record it project-locally (`.pi/settings.json`) instead of user-wide.
 
-### Option 1: npm (recommended, once published)
+### Option 1: npm (recommended)
 
 ```bash
 pi install npm:pi-singularity-provider
@@ -186,6 +186,10 @@ This will:
 5. Update `models.json` and the README model table
 
 Note: the runtime already revalidates live on every session start, so this script is for refreshing the committed snapshot — not required for day-to-day freshness.
+
+## Using SingularityAPI with Other Agents and Tools
+
+This extension is pi-specific, but SingularityAPI is not: any coding agent that can point at a custom OpenAI-compatible endpoint can use it with just the base URL and an API key. [INTEGRATING.md](INTEGRATING.md) is the complete, agent-agnostic integration guide — the `/v1/models` metadata format, request-parameter policy, reasoning levels, receipts, and cost accounting — so other agents (or their humans) can replicate everything this extension does for pi.
 
 ## License
 
