@@ -67,14 +67,14 @@ Get your API key at [app.singularityapi.dev](https://app.singularityapi.dev) (AP
 
 | Model | Context | Reasoning | Input | Max Output | Input $/M | Output $/M |
 |-------|---------|-----------|-------|------------|-----------|------------|
-| DeepSeek V3.2 | 128K | ❌ | Text | 128K | $0.186 | $0.28 |
-| DeepSeek V4 Flash | 1M | ❌ | Text | 384K | $0.081 | $0.162 |
-| DeepSeek V4 Pro | 1M | ❌ | Text | 384K | $0.392 | $0.783 |
+| DeepSeek V3.2 | 128K | ✅ | Text | 128K | $0.186 | $0.28 |
+| DeepSeek V4 Flash | 1M | ✅ | Text | 384K | $0.081 | $0.162 |
+| DeepSeek V4 Pro | 1M | ✅ | Text | 384K | $0.392 | $0.783 |
 | GPT-5.6 Luna | 272K | ✅ | Text | 128K | $1.00 | $6.00 |
 | GPT-5.6 Sol | 272K | ✅ | Text | 128K | $5.00 | $30.00 |
 | GPT-5.6 Terra | 272K | ✅ | Text | 128K | $2.50 | $15.00 |
-| Kimi K2.6 | 262K | ❌ | Text | 262K | $0.581 | $2.45 |
-| Kimi K2.7 Code | 262K | ❌ | Text | 262K | $0.639 | $3.15 |
+| Kimi K2.6 | 262K | ✅ | Text | 262K | $0.581 | $2.45 |
+| Kimi K2.7 Code | 262K | ✅ | Text | 262K | $0.639 | $3.15 |
 
 *Pricing and limits refresh live from [`GET /v1/models`](https://docs.singularityapi.dev/api/models-receipts) on session start (the endpoint is served `cache-control: no-store`, so what you see is always current). Table above mirrors the catalog as of 2026-08-03.*
 
