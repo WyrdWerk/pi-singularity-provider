@@ -74,7 +74,7 @@ Set up SingularityAPI as an OpenAI-compatible model provider for this agent.
 
 ```bash
 # Recommended: add to auth.json (see Authentication below)
-# Or set as environment variable
+# Or set as environment variable (Windows syntax differs — see Authentication)
 export SINGULARITY_API_KEY=sapi_...
 
 pi
@@ -150,13 +150,30 @@ Every SingularityAPI response — including errors after admission and streams �
 
 The SingularityAPI key can be configured in multiple ways (resolved in this order):
 
-1. **`auth.json`** (recommended) — Add to `~/.pi/agent/auth.json`:
+1. **`auth.json`** (recommended, OS-independent) — Add to `~/.pi/agent/auth.json` (`%USERPROFILE%\.pi\agent\auth.json` on Windows):
    ```json
    { "singularity": { "type": "api_key", "key": "sapi_..." } }
    ```
    The `key` field supports literal values, env var names, and shell commands (prefix with `!`). See [pi's auth file docs](https://github.com/badlogic/pi-mono) for details.
 2. **Runtime override** — Use the `--api-key` CLI flag
-3. **Environment variable** — Set `SINGULARITY_API_KEY`
+3. **Environment variable** — Set `SINGULARITY_API_KEY` (syntax differs by shell):
+
+   ```bash
+   # Linux / macOS (bash, zsh) — current session; add to ~/.bashrc or ~/.zshrc to persist
+   export SINGULARITY_API_KEY=sapi_...
+   ```
+   ```powershell
+   # Windows PowerShell — current session
+   $env:SINGULARITY_API_KEY = "sapi_..."
+   # persist for your user (takes effect in new sessions)
+   [Environment]::SetEnvironmentVariable("SINGULARITY_API_KEY", "sapi_...", "User")
+   ```
+   ```cmd
+   :: Windows CMD — current session
+   set SINGULARITY_API_KEY=sapi_...
+   :: persist for your user (takes effect in new sessions)
+   setx SINGULARITY_API_KEY "sapi_..."
+   ```
 
 ## Environment Variables
 
