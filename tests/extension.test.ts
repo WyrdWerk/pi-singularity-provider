@@ -36,9 +36,8 @@ const LIVE_MODELS_RESPONSE = {
       ],
     },
     {
-      // Canonical reasoning advertisement on an unpatched model: the API wins
-      // over embedded curation (embedded says reasoning: false for kimi-k2.6),
-      // and live limits win (300000 vs embedded 262144).
+      // Reasoning advertised on a now-PATCHED model: live limits still win
+      // (300000 vs embedded 262144), but the patch map shadows the API's map.
       id: "kimi-k2.6",
       object: "model",
       created: 1690000000,
@@ -114,6 +113,24 @@ const LIVE_MODELS_RESPONSE = {
           pricing: { input_per_million_usd: "1.000000000000", output_per_million_usd: "2.000000000000" },
           // Bare boolean: supported; the levels come from the model entry above.
           reasoning: true,
+        },
+      ],
+    },
+    {
+      // Canonical reasoning advertisement on an UNPATCHED live-only model:
+      // the API wins outright, including a genuine "minimal" effort.
+      id: "new-model-y",
+      object: "model",
+      created: 1690000003,
+      owned_by: "singularityapi",
+      capabilities: [
+        {
+          endpoint: "/v1/chat/completions",
+          context_window_tokens: 64000,
+          maximum_output_tokens: 4096,
+          default_output_tokens: 4096,
+          pricing: { input_per_million_usd: "0.500000000000", output_per_million_usd: "1.500000000000" },
+          reasoning: { supported: true, efforts: ["none", "minimal", "low", "medium", "high"] },
         },
       ],
     },
@@ -257,7 +274,7 @@ describe("provider registration (stale-while-revalidate)", () => {
       supportsStore: false,
     });
 
-    // patch.json enables reasoning experimentally for the DeepSeek V4 family:
+    // patch.json enables reasoning experimentally for every non-GPT model:
     // "off" is deliberately absent from the map, so thinking-off requests send
     // no reasoning_effort at all; low/medium/high map to the same-named effort.
     const flash = models.find((m: any) => m.id === "deepseek-v4-flash");
@@ -276,9 +293,14 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(flash.contextWindow).toBe(1000000);
     expect(flash.maxTokens).toBe(384000);
 
-    const pro = models.find((m: any) => m.id === "deepseek-v4-pro");
-    expect(pro.reasoning).toBe(true);
-    expect(pro.thinkingLevelMap).toEqual(flash.thinkingLevelMap);
+    for (const id of ["deepseek-v4-pro", "deepseek-v3.2", "kimi-k2.6", "kimi-k2.7-code"]) {
+      const patched = models.find((m: any) => m.id === id);
+      expect(patched.reasoning).toBe(true);
+      expect(patched.thinkingLevelMap).toEqual(flash.thinkingLevelMap);
+      expect(patched.thinkingLevelMap.off).toBeUndefined();
+      expect(patched.compat.thinkingFormat).toBe("openai");
+      expect(patched.compat.supportsReasoningEffort).toBe(true);
+    }
   });
 
   test("revalidates on session_start: live limits/pricing win, curation kept, cache written", async () => {
@@ -292,8 +314,8 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(pi.registrations).toHaveLength(2);
     const models = pi.registrations[1].config.models;
 
-    // 8 embedded + 1 live-only model; deepseek-v4-flash merged, not duplicated
-    expect(models).toHaveLength(9);
+    // 8 embedded + 2 live-only models; deepseek-v4-flash merged, not duplicated
+    expect(models).toHaveLength(10);
     expect(models.filter((m: any) => m.id === "deepseek-v4-flash")).toHaveLength(1);
 
     const flash = models.find((m: any) => m.id === "deepseek-v4-flash");
@@ -321,25 +343,36 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(flash.name).toBe("DeepSeek V4 Flash");
     expect(flash.compat.maxTokensField).toBe("max_completion_tokens");
 
-    // On an unpatched model the API's canonical reasoning advertisement wins
-    // over embedded curation (embedded says reasoning: false), and live
-    // limits win numerically (300000 vs embedded 262144).
+    // kimi-k2.6 is patched too: live limits still win (300000 vs embedded
+    // 262144), but the patch map shadows the API-advertised one — same final
+    // override semantics as flash.
     const kimi = models.find((m: any) => m.id === "kimi-k2.6");
     expect(kimi.name).toBe("Kimi K2.6");
     expect(kimi.contextWindow).toBe(300000);
     expect(kimi.reasoning).toBe(true);
-    expect(kimi.thinkingLevelMap).toEqual({
+    expect(kimi.thinkingLevelMap).toEqual(flash.thinkingLevelMap);
+    expect(kimi.thinkingLevelMap.off).toBeUndefined();
+    expect(kimi.compat.thinkingFormat).toBe("openai");
+    expect(kimi.compat.supportsReasoningEffort).toBe(true);
+    expect(kimi.compat.maxTokensField).toBe("max_completion_tokens");
+
+    // On an UNPATCHED live-only model, the API's canonical reasoning
+    // advertisement wins outright — including a genuine "minimal" effort,
+    // which maps to itself rather than falling back to "low".
+    const modelY = models.find((m: any) => m.id === "new-model-y");
+    expect(modelY.reasoning).toBe(true);
+    expect(modelY.contextWindow).toBe(64000);
+    expect(modelY.thinkingLevelMap).toEqual({
       off: "none",
-      minimal: "low",
+      minimal: "minimal",
       low: "low",
       medium: "medium",
       high: "high",
       xhigh: null,
       max: null,
     });
-    expect(kimi.compat.thinkingFormat).toBe("openai");
-    expect(kimi.compat.supportsReasoningEffort).toBe(true);
-    expect(kimi.compat.maxTokensField).toBe("max_completion_tokens");
+    expect(modelY.compat.thinkingFormat).toBe("openai");
+    expect(modelY.compat.supportsReasoningEffort).toBe(true);
 
     // Explicit API negative (supported_parameters without reasoning_effort)
     // overrides embedded curation's reasoning: true
@@ -400,7 +433,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     const models = pi2.registrations[0].config.models;
     expect(models.find((m: any) => m.id === "new-model-x")).toBeTruthy();
     expect(models.find((m: any) => m.id === "deepseek-v4-flash").contextWindow).toBe(777777);
-    expect(models).toHaveLength(9);
+    expect(models).toHaveLength(10);
   });
 
   test("keeps the embedded catalog when no API key is configured", async () => {

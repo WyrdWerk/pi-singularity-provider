@@ -22,5 +22,41 @@
       "max": null
     },
     "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+  },
+  "deepseek-v3.2": {
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": null,
+      "max": null
+    },
+    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+  },
+  "kimi-k2.6": {
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": null,
+      "max": null
+    },
+    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+  },
+  "kimi-k2.7-code": {
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": null,
+      "max": null
+    },
+    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
   }
 }
