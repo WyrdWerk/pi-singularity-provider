@@ -42,12 +42,13 @@
  * to inspect the exact tokens, cost, and latency of any request.
  */
 
-import { getAgentDir, type ExtensionAPI, type ModelRegistry } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ModelRegistry } from "@earendil-works/pi-coding-agent";
 import modelsData from "./models.json" with { type: "json" };
 import customModelsData from "./custom-models.json" with { type: "json" };
 import patchData from "./patch.json" with { type: "json" };
 import deprecatedData from "./deprecated-models.json" with { type: "json" };
 import fs from "fs";
+import os from "os";
 import path from "path";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -182,6 +183,17 @@ const PROVIDER_ID = "singularity";
 const BASE_URL = "https://api.singularityapi.dev/v1";
 const MODELS_URL = `${BASE_URL}/models`;
 const RECEIPTS_URL = `${BASE_URL}/receipts`;
+// Resolve pi's agent dir locally instead of importing it from the pi package:
+// a runtime value import of "@earendil-works/pi-coding-agent" only resolves when
+// pi happens to be reachable from the extension's node_modules (older pi
+// versions and some install layouts don't provide it — e.g. npm -g on Windows).
+// Semantics mirror pi's own getAgentDir(): env override, else ~/.pi/agent.
+function getAgentDir(): string {
+  const envDir = process.env.PI_CODING_AGENT_DIR;
+  if (envDir) return envDir.replace(/^~(?=$|[\\/])/, os.homedir());
+  return path.join(os.homedir(), ".pi", "agent");
+}
+
 const CACHE_DIR = path.join(getAgentDir(), "cache");
 const CACHE_PATH = path.join(CACHE_DIR, `${PROVIDER_ID}-models.json`);
 const LIVE_FETCH_TIMEOUT_MS = 8000;
