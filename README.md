@@ -17,7 +17,7 @@ _Live catalog metadata — context windows, output limits, exact pricing — plu
 
 - **Curated catalog** — DeepSeek V4, Kimi K2.6/K2.7, and GPT-5.6 (Sol/Terra/Luna) through one OpenAI-compatible endpoint
 - **Live metadata sync** — models, context windows, max output tokens, and exact per-token pricing refreshed from `GET /v1/models` on session start (stale-while-revalidate; zero-latency startup from embedded snapshot + disk cache)
-- **Reasoning models** — GPT-5.6 family with `reasoning_effort` thinking levels (always sent explicitly, so tool use works); DeepSeek and Kimi enabled experimentally via `patch.json` — see [Thinking Mode](#thinking-mode)
+- **Reasoning models** — GPT-5.6 family with `reasoning_effort` thinking levels (always sent explicitly, so tool use works); DeepSeek and Kimi verified at low/medium/high via `patch.json` — see [Thinking Mode](#thinking-mode)
 - **Receipts** — every response carries an `x-singularity-receipt-id` header; `/singularity-receipt` shows the exact tokens, cost, and latency for any request
 
 ## Installation
@@ -96,7 +96,7 @@ pi --provider singularity --model deepseek-v4-flash
 
 The GPT-5.6 models (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`) are reasoning models using the `openai` thinking format (`reasoning_effort`). The extension always sends an explicit `reasoning_effort` for these models — including `"none"` when thinking is off — because SingularityAPI's upstream rejects tool calls that omit it ("Function tools with reasoning_effort are not supported…"). Level mapping: off→none, minimal/low→low, medium→medium, high→high.
 
-All DeepSeek and Kimi models have reasoning **enabled experimentally** via [`patch.json`](patch.json), pending API metadata: thinking **off sends no `reasoning_effort` at all** (requests stay byte-identical to a non-reasoning model, so unsupported models keep working normally with thinking off), while low/medium/high send the same-named effort. The failure mode is loud, not silent: if a model's upstream rejects the parameter you get a 400 on that request — Shift+Tab back to off and it works as before. To revert everywhere, restore `patch.json` to `{}`; to disable for one model, delete just its entry.
+All DeepSeek and Kimi models have reasoning **enabled via [`patch.json`](patch.json), verified against the gateway** (2026-09-13 probe): every one of them accepts `reasoning_effort` at **low/medium/high** and returns a `reasoning_content` thinking channel; **xhigh/max are rejected with a 400** on all of them and are therefore hidden from the level cycle, as is minimal (no distinct upstream level). Thinking **off sends no `reasoning_effort` at all**, so requests stay byte-identical to a non-reasoning model. One quirk: `deepseek-v3.2` at `low` accepts the level but may not produce thinking on trivial prompts (medium/high think reliably). To revert everywhere, restore `patch.json` to `{}`; to disable for one model, delete just its entry.
 
 **Reasoning is populated dynamically.** The extension reads reasoning capability straight from `GET /v1/models` whenever the API exposes it — no extension update needed. On the chat-completions capability entry (or the model itself), any of these shapes is recognized:
 

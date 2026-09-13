@@ -41,7 +41,7 @@ The runtime does the same merge in-memory on every session start (stale-while-re
 ### Add a compat setting or override pricing for an existing model
 → Edit `patch.json`. Add an entry keyed by the model's `id`.
 
-Note: `patch.json` currently carries the **experimental reasoning entries for all DeepSeek and Kimi models** — pending reasoning metadata in `/v1/models`. The maps deliberately omit `off` so thinking-off requests send no `reasoning_effort` (unsupported models behave exactly as non-reasoning with thinking off); low/medium/high send the same-named effort, which a non-supporting upstream rejects with a visible 400. To revert the experiment, restore `patch.json` to `{}`. Once the API advertises reasoning for a model, delete its entry and let the dynamic population take over.
+Note: `patch.json` carries the **reasoning entries for all DeepSeek and Kimi models**, verified against the gateway on 2026-09-13 (25-request probe): all five accept `reasoning_effort` low/medium/high and return `reasoning_content`; xhigh/max 400 on all five and stay hidden; minimal stays hidden (no distinct upstream level). The maps deliberately omit `off` so thinking-off requests send no `reasoning_effort`. Quirk: `deepseek-v3.2` at `low` may not think on trivial prompts. Once `/v1/models` advertises reasoning for a model, delete its patch entry and let the dynamic population take over.
 
 ### Add a model not listed by the provider API
 → Edit `custom-models.json`. Add a full model object to the array.
