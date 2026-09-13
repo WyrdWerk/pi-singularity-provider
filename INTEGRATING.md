@@ -82,7 +82,7 @@ Reasoning is controlled with the OpenAI-style `reasoning_effort` parameter.
 
 Map them onto your agent's thinking levels (off→`none`, minimal→`minimal`/`low`, others same-named; hide levels the API doesn't advertise). If the API is silent and you choose to offer reasoning anyway: **send nothing when thinking is off** (so unsupported models behave exactly as non-reasoning), and send the same-named effort for on levels — a non-supporting upstream answers with a visible 400, never silent misbehavior.
 
-**Verified data point (2026-09-13 probe):** all DeepSeek (V3.2, V4-pro, V4-flash) and Kimi (K2.6, K2.7-code) models accept `low`/`medium`/`high` and return a `reasoning_content` channel; `xhigh`/`max` are rejected with a 400 on all of them. The gateway does not populate `completion_tokens_details.reasoning_tokens` — detect thinking via the `reasoning_content` message key instead.
+**Verified data points (2026-09-13 probes):** DeepSeek (V3.2, V4-pro, V4-flash, V4-flash-0731), Kimi (K2.6, K2.7-code), and GLM 5.3 accept `low`/`medium`/`high` and return a `reasoning_content` channel, rejecting `xhigh`/`max` with a 400. **Kimi K3 and GPT-6 Astra think at all five levels** (`low`…`max`). GPT-6 Astra **rejects `reasoning_effort: "none"` with a 400** — never send an explicit off value to it (unlike GPT-5.6, which requires it). DeepSeek V4.1-flash accepts every level without error but never returns a thinking channel — treat it as non-reasoning. Thinking evidence is the `reasoning_content` message key; `completion_tokens_details.reasoning_tokens` may read 0 even when thinking happened, and some models add a `provider_specific_fields` key that carries no reasoning data.
 
 ## 4. Receipts — exact per-request cost
 

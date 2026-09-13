@@ -296,7 +296,7 @@ function transformApiModel(apiModel, existingModelsMap) {
   const liveCost = {
     input: parsePrice(cap.pricing?.input_per_million_usd),
     output: parsePrice(cap.pricing?.output_per_million_usd),
-    cacheRead: 0,
+    cacheRead: parsePrice(cap.pricing?.cached_input_per_million_usd),
     cacheWrite: 0,
   };
   const liveContext = cap.context_window_tokens || 0;
@@ -311,7 +311,7 @@ function transformApiModel(apiModel, existingModelsMap) {
     existing.cost = {
       input: liveCost.input || existing.cost.input,
       output: liveCost.output || existing.cost.output,
-      cacheRead: existing.cost.cacheRead ?? 0,
+      cacheRead: liveCost.cacheRead || (existing.cost.cacheRead ?? 0),
       cacheWrite: existing.cost.cacheWrite ?? 0,
     };
     if (liveContext) existing.contextWindow = liveContext;
@@ -421,8 +421,8 @@ function formatCost(cost) {
 
 function generateReadmeTable(models) {
   const lines = [
-    '| Model | Context | Reasoning | Input | Max Output | Input $/M | Output $/M |',
-    '|-------|---------|-----------|-------|------------|-----------|------------|',
+    '| Model | Context | Reasoning | Input | Max Output | Input $/M | Cached $/M | Output $/M |',
+    '|-------|---------|-----------|-------|------------|-----------|------------|-------------|',
   ];
 
   for (const model of models) {
@@ -431,9 +431,10 @@ function generateReadmeTable(models) {
     const input = model.input.includes('image') ? 'Text + Image' : 'Text';
     const maxOutput = formatContext(model.maxTokens);
     const inputCost = formatCost(model.cost.input);
+    const cachedCost = formatCost(model.cost.cacheRead);
     const outputCost = formatCost(model.cost.output);
 
-    lines.push(`| ${model.name} | ${context} | ${reasoning} | ${input} | ${maxOutput} | ${inputCost} | ${outputCost} |`);
+    lines.push(`| ${model.name} | ${context} | ${reasoning} | ${input} | ${maxOutput} | ${inputCost} | ${cachedCost} | ${outputCost} |`);
   }
 
   return lines.join('\n');

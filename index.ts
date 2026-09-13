@@ -300,6 +300,7 @@ function transformApiModel(apiModel: any): LiveModel | null {
 
   const inputPrice = Number.parseFloat(cap.pricing?.input_per_million_usd ?? "");
   const outputPrice = Number.parseFloat(cap.pricing?.output_per_million_usd ?? "");
+  const cachedPrice = Number.parseFloat(cap.pricing?.cached_input_per_million_usd ?? "");
 
   const model: LiveModel = {
     id,
@@ -308,7 +309,7 @@ function transformApiModel(apiModel: any): LiveModel | null {
     cost: {
       input: Number.isFinite(inputPrice) ? inputPrice : 0,
       output: Number.isFinite(outputPrice) ? outputPrice : 0,
-      cacheRead: 0,
+      cacheRead: Number.isFinite(cachedPrice) ? cachedPrice : 0,
       cacheWrite: 0,
     },
     contextWindow: cap.context_window_tokens || 0,

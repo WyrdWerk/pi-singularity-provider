@@ -27,7 +27,11 @@ const LIVE_MODELS_RESPONSE = {
           context_window_tokens: 777777,
           maximum_output_tokens: 5555,
           default_output_tokens: 8192,
-          pricing: { input_per_million_usd: "0.100000000000", output_per_million_usd: "0.200000000000" },
+          pricing: {
+            input_per_million_usd: "0.100000000000",
+            output_per_million_usd: "0.200000000000",
+            cached_input_per_million_usd: "0.050000000000",
+          },
           // Canonical reasoning advertisement — but patch.json pins this
           // model's reasoning experimentally, and the patch is the final
           // override, so the patch map (not this one) must win.
@@ -254,15 +258,15 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(reg.config.api).toBe("openai-completions");
 
     const models = reg.config.models;
-    expect(models).toHaveLength(8);
+    expect(models).toHaveLength(13);
 
     const luna = models.find((m: any) => m.id === "gpt-5.6-luna");
     expect(luna).toMatchObject({
       name: "GPT-5.6 Luna",
       reasoning: true,
-      contextWindow: 272000,
+      contextWindow: 1000000,
       maxTokens: 128000,
-      cost: { input: 1.0, output: 6.0, cacheRead: 0, cacheWrite: 0 },
+      cost: { input: 0.18, output: 1.1, cacheRead: 0.02, cacheWrite: 0 },
     });
     expect(luna.thinkingLevelMap.off).toBe("none");
     expect(luna.thinkingLevelMap.xhigh).toBeNull();
@@ -293,7 +297,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(flash.contextWindow).toBe(1000000);
     expect(flash.maxTokens).toBe(384000);
 
-    for (const id of ["deepseek-v4-pro", "deepseek-v3.2", "kimi-k2.6", "kimi-k2.7-code"]) {
+    for (const id of ["deepseek-v4-pro", "deepseek-v3.2", "kimi-k2.6", "kimi-k2.7-code", "deepseek-v4-flash-0731", "glm-5.3"]) {
       const patched = models.find((m: any) => m.id === id);
       expect(patched.reasoning).toBe(true);
       expect(patched.thinkingLevelMap).toEqual(flash.thinkingLevelMap);
@@ -301,6 +305,34 @@ describe("provider registration (stale-while-revalidate)", () => {
       expect(patched.compat.thinkingFormat).toBe("openai");
       expect(patched.compat.supportsReasoningEffort).toBe(true);
     }
+
+    // Verified to think at ALL five on-levels (2026-09-13 probe): xhigh and
+    // max are exposed, off still omitted (astra 400s on reasoning_effort:"none").
+    for (const id of ["kimi-k3", "gpt-6-astra"]) {
+      const extended = models.find((m: any) => m.id === id);
+      expect(extended.reasoning).toBe(true);
+      expect(extended.thinkingLevelMap).toEqual({
+        minimal: null,
+        low: "low",
+        medium: "medium",
+        high: "high",
+        xhigh: "xhigh",
+        max: "max",
+      });
+      expect(extended.thinkingLevelMap.off).toBeUndefined();
+    }
+
+    // Curated display names via patch.json
+    expect(models.find((m: any) => m.id === "deepseek-v4-flash-0731").name).toBe("DeepSeek V4 Flash 0731");
+    expect(models.find((m: any) => m.id === "deepseek-v4.1-flash").name).toBe("DeepSeek V4.1 Flash");
+    expect(models.find((m: any) => m.id === "glm-5.3").name).toBe("GLM 5.3");
+    expect(models.find((m: any) => m.id === "gpt-6-astra").name).toBe("GPT-6 Astra");
+
+    // deepseek-v4.1-flash accepts reasoning_effort at every level but never
+    // returns a thinking channel (probe) — registered non-reasoning.
+    const v41 = models.find((m: any) => m.id === "deepseek-v4.1-flash");
+    expect(v41.reasoning).toBe(false);
+    expect(v41.thinkingLevelMap).toBeUndefined();
   });
 
   test("revalidates on session_start: live limits/pricing win, curation kept, cache written", async () => {
@@ -314,8 +346,8 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(pi.registrations).toHaveLength(2);
     const models = pi.registrations[1].config.models;
 
-    // 8 embedded + 2 live-only models; deepseek-v4-flash merged, not duplicated
-    expect(models).toHaveLength(10);
+    // 13 embedded + 2 live-only models; deepseek-v4-flash merged, not duplicated
+    expect(models).toHaveLength(15);
     expect(models.filter((m: any) => m.id === "deepseek-v4-flash")).toHaveLength(1);
 
     const flash = models.find((m: any) => m.id === "deepseek-v4-flash");
@@ -324,6 +356,8 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(flash.maxTokens).toBe(5555);
     expect(flash.cost.input).toBeCloseTo(0.1, 10);
     expect(flash.cost.output).toBeCloseTo(0.2, 10);
+    // Live cached-input pricing wins too (embedded flash has 0.007)
+    expect(flash.cost.cacheRead).toBeCloseTo(0.05, 10);
     // ...but for reasoning, patch.json is the final override: the experimental
     // patch map shadows the API-advertised one (off stays absent → thinking-off
     // sends nothing; medium enabled by the patch despite the API omitting it).
@@ -349,6 +383,8 @@ describe("provider registration (stale-while-revalidate)", () => {
     const kimi = models.find((m: any) => m.id === "kimi-k2.6");
     expect(kimi.name).toBe("Kimi K2.6");
     expect(kimi.contextWindow).toBe(300000);
+    // Live payload carries no cached-input price for kimi → embedded one preserved
+    expect(kimi.cost.cacheRead).toBeCloseTo(0.128, 10);
     expect(kimi.reasoning).toBe(true);
     expect(kimi.thinkingLevelMap).toEqual(flash.thinkingLevelMap);
     expect(kimi.thinkingLevelMap.off).toBeUndefined();
@@ -433,7 +469,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     const models = pi2.registrations[0].config.models;
     expect(models.find((m: any) => m.id === "new-model-x")).toBeTruthy();
     expect(models.find((m: any) => m.id === "deepseek-v4-flash").contextWindow).toBe(777777);
-    expect(models).toHaveLength(10);
+    expect(models).toHaveLength(15);
   });
 
   test("keeps the embedded catalog when no API key is configured", async () => {
@@ -445,7 +481,7 @@ describe("provider registration (stale-while-revalidate)", () => {
 
     // No key → no live fetch possible → no re-registration
     expect(pi.registrations).toHaveLength(1);
-    expect(pi.registrations[0].config.models).toHaveLength(8);
+    expect(pi.registrations[0].config.models).toHaveLength(13);
   });
 
   test("keeps serving stale models when the live fetch fails", async () => {
@@ -457,7 +493,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     await flushMicrotasks();
 
     expect(pi.registrations).toHaveLength(2);
-    expect(pi.registrations[1].config.models).toHaveLength(8);
+    expect(pi.registrations[1].config.models).toHaveLength(13);
   });
 
   test("aborts a superseded revalidation on shutdown", async () => {

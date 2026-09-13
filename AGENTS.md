@@ -41,7 +41,7 @@ The runtime does the same merge in-memory on every session start (stale-while-re
 ### Add a compat setting or override pricing for an existing model
 → Edit `patch.json`. Add an entry keyed by the model's `id`.
 
-Note: `patch.json` carries the **reasoning entries for all DeepSeek and Kimi models**, verified against the gateway on 2026-09-13 (25-request probe): all five accept `reasoning_effort` low/medium/high and return `reasoning_content`; xhigh/max 400 on all five and stay hidden; minimal stays hidden (no distinct upstream level). The maps deliberately omit `off` so thinking-off requests send no `reasoning_effort`. Quirk: `deepseek-v3.2` at `low` may not think on trivial prompts. Once `/v1/models` advertises reasoning for a model, delete its patch entry and let the dynamic population take over.
+Note: `patch.json` carries the **reasoning entries for all reasoning-capable non-GPT-5.6 models**, verified against the gateway on 2026-09-13 (two probes, ~50 requests): DeepSeek V3.2/V4 family, Kimi K2.6/K2.7, and GLM 5.3 think at low/medium/high (xhigh/max 400, hidden); **Kimi K3 and GPT-6 Astra think at all five levels** (xhigh/max exposed). All maps omit `off` so thinking-off sends no `reasoning_effort` — for GPT-6 Astra this is mandatory (`"none"` 400s even on plain chat; opposite of the GPT-5.6 rule). `deepseek-v4.1-flash` accepts all levels but never thinks → kept non-reasoning (name-only patch). Quirks: `deepseek-v3.2`@low and `gpt-6-astra` below high may not think on trivial prompts. Once `/v1/models` advertises reasoning for a model, delete its patch entry and let the dynamic population take over.
 
 ### Add a model not listed by the provider API
 → Edit `custom-models.json`. Add a full model object to the array.

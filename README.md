@@ -15,7 +15,7 @@ _Live catalog metadata — context windows, output limits, exact pricing — plu
 
 ## Features
 
-- **Curated catalog** — DeepSeek V4, Kimi K2.6/K2.7, and GPT-5.6 (Sol/Terra/Luna) through one OpenAI-compatible endpoint
+- **Curated catalog** — 13 chat models across the DeepSeek, Kimi, GLM, and GPT families through one OpenAI-compatible endpoint
 - **Live metadata sync** — models, context windows, max output tokens, and exact per-token pricing refreshed from `GET /v1/models` on session start (stale-while-revalidate; zero-latency startup from embedded snapshot + disk cache)
 - **Reasoning models** — GPT-5.6 family with `reasoning_effort` thinking levels (always sent explicitly, so tool use works); DeepSeek and Kimi verified at low/medium/high via `patch.json` — see [Thinking Mode](#thinking-mode)
 - **Receipts** — every response carries an `x-singularity-receipt-id` header; `/singularity-receipt` shows the exact tokens, cost, and latency for any request
@@ -65,18 +65,23 @@ Get your API key at [app.singularityapi.dev](https://app.singularityapi.dev) (AP
 
 ## Available Models
 
-| Model | Context | Reasoning | Input | Max Output | Input $/M | Output $/M |
-|-------|---------|-----------|-------|------------|-----------|------------|
-| DeepSeek V3.2 | 128K | ✅ | Text | 128K | $0.186 | $0.28 |
-| DeepSeek V4 Flash | 1M | ✅ | Text | 384K | $0.081 | $0.162 |
-| DeepSeek V4 Pro | 1M | ✅ | Text | 384K | $0.392 | $0.783 |
-| GPT-5.6 Luna | 272K | ✅ | Text | 128K | $1.00 | $6.00 |
-| GPT-5.6 Sol | 272K | ✅ | Text | 128K | $5.00 | $30.00 |
-| GPT-5.6 Terra | 272K | ✅ | Text | 128K | $2.50 | $15.00 |
-| Kimi K2.6 | 262K | ✅ | Text | 262K | $0.581 | $2.45 |
-| Kimi K2.7 Code | 262K | ✅ | Text | 262K | $0.639 | $3.15 |
+| Model | Context | Reasoning | Input | Max Output | Input $/M | Cached $/M | Output $/M |
+|-------|---------|-----------|-------|------------|-----------|------------|-------------|
+| DeepSeek V3.2 | 128K | ✅ | Text | 128K | $0.186 | — | $0.28 |
+| DeepSeek V4 Flash | 1M | ✅ | Text | 384K | $0.081 | $0.007 | $0.162 |
+| DeepSeek V4 Flash 0731 | 1M | ✅ | Text | 384K | $0.20 | $0.007 | $0.50 |
+| DeepSeek V4 Pro | 1M | ✅ | Text | 384K | $0.392 | $0.128 | $0.783 |
+| DeepSeek V4.1 Flash | 1M | ❌ | Text | 384K | $0.13 | $0.003 | $0.50 |
+| GLM 5.3 | 1M | ✅ | Text | 131K | $1.17 | $0.245 | $3.96 |
+| GPT-5.6 Luna | 1M | ✅ | Text | 128K | $0.18 | $0.02 | $1.10 |
+| GPT-5.6 Sol | 1M | ✅ | Text | 128K | $2.40 | $0.20 | $14.00 |
+| GPT-5.6 Terra | 1M | ✅ | Text | 128K | $1.80 | $0.20 | $10.00 |
+| GPT-6 Astra | 1M | ✅ | Text | 128K | $10.00 | $1.00 | $35.00 |
+| Kimi K2.6 | 262K | ✅ | Text | 262K | $0.581 | $0.128 | $2.448 |
+| Kimi K2.7 Code | 262K | ✅ | Text | 262K | $0.639 | $0.152 | $3.15 |
+| Kimi K3 | 1M | ✅ | Text | 262K | $2.50 | $0.30 | $14.00 |
 
-*Pricing and limits refresh live from [`GET /v1/models`](https://docs.singularityapi.dev/api/models-receipts) on session start (the endpoint is served `cache-control: no-store`, so what you see is always current). Table above mirrors the catalog as of 2026-08-03.*
+*Pricing and limits refresh live from [`GET /v1/models`](https://docs.singularityapi.dev/api/models-receipts) on session start (the endpoint is served `cache-control: no-store`, so what you see is always current). Table above mirrors the catalog as of 2026-09-13.*
 
 ## Usage
 
@@ -96,7 +101,7 @@ pi --provider singularity --model deepseek-v4-flash
 
 The GPT-5.6 models (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`) are reasoning models using the `openai` thinking format (`reasoning_effort`). The extension always sends an explicit `reasoning_effort` for these models — including `"none"` when thinking is off — because SingularityAPI's upstream rejects tool calls that omit it ("Function tools with reasoning_effort are not supported…"). Level mapping: off→none, minimal/low→low, medium→medium, high→high.
 
-All DeepSeek and Kimi models have reasoning **enabled via [`patch.json`](patch.json), verified against the gateway** (2026-09-13 probe): every one of them accepts `reasoning_effort` at **low/medium/high** and returns a `reasoning_content` thinking channel; **xhigh/max are rejected with a 400** on all of them and are therefore hidden from the level cycle, as is minimal (no distinct upstream level). Thinking **off sends no `reasoning_effort` at all**, so requests stay byte-identical to a non-reasoning model. One quirk: `deepseek-v3.2` at `low` accepts the level but may not produce thinking on trivial prompts (medium/high think reliably). To revert everywhere, restore `patch.json` to `{}`; to disable for one model, delete just its entry.
+All DeepSeek, Kimi, and GLM chat models — plus GPT-6 Astra — have reasoning **enabled via [`patch.json`](patch.json), verified against the gateway** (2026-09-13 probes): all of them accept `reasoning_effort` at **low/medium/high** and return a `reasoning_content` thinking channel; **kimi-k3 and gpt-6-astra additionally think at xhigh/max**, which are exposed for them and hidden everywhere else (400 on the rest), as is minimal. Thinking **off sends no `reasoning_effort` at all** — for GPT-6 Astra this is mandatory, since it 400s on `reasoning_effort: "none"` (the exact opposite of the GPT-5.6 rule above). Two quirks: `deepseek-v3.2` at `low` and `gpt-6-astra` below `high` may not produce visible thinking on trivial prompts. `deepseek-v4.1-flash` accepts every level but never returns a thinking channel, so it is registered non-reasoning. To revert everywhere, restore `patch.json` to `{}`; to disable for one model, delete just its entry.
 
 **Reasoning is populated dynamically.** The extension reads reasoning capability straight from `GET /v1/models` whenever the API exposes it — no extension update needed. On the chat-completions capability entry (or the model itself), any of these shapes is recognized:
 
