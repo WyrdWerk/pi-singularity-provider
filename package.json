@@ -1,0 +1,43 @@
+{
+  "name": "pi-singularity-provider",
+  "version": "1.0.0",
+  "description": "SingularityAPI provider extension for pi - DeepSeek, Kimi, and GPT models with live catalog metadata (context, limits, exact pricing) and per-request receipts",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "clean": "echo 'nothing to clean'",
+    "build": "echo 'nothing to build'",
+    "check": "tsc --noEmit",
+    "test": "bun test",
+    "update-models": "node scripts/update-models.js"
+  },
+  "keywords": [
+    "pi",
+    "extension",
+    "provider",
+    "singularity",
+    "singularityapi",
+    "ai",
+    "llm",
+    "deepseek",
+    "kimi",
+    "gpt",
+    "receipts"
+  ],
+  "author": "WyrdWerk",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wyrdwerk/pi-singularity-provider.git"
+  },
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "0.85.1",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  }
+}

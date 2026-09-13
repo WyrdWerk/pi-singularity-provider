@@ -1,0 +1,26 @@
+{
+  "deepseek-v4-pro": {
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": null,
+      "max": null
+    },
+    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+  },
+  "deepseek-v4-flash": {
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": null,
+      "max": null
+    },
+    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+  }
+}
