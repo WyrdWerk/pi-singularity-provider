@@ -9,6 +9,9 @@ build/
 .env
 .env.local
 
+# Local npm auth (CI-style token reference, never commit)
+.npmrc
+
 # IDE
 .vscode/
 .idea/
