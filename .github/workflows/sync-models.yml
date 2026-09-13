@@ -1,0 +1,43 @@
+name: Sync models
+
+# Refreshes models.json / deprecated-models.json / README table from the live
+# GET /v1/models endpoint and opens a PR with the diff. The API key lives in
+# the SINGULARITY_API_KEY Actions secret (repo settings) — never in the repo;
+# forks and fork PRs receive no secrets, and GitHub masks it in logs.
+
+on:
+  schedule:
+    - cron: "17 */12 * * *" # twice daily
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Refresh catalog from /v1/models
+        run: node scripts/update-models.js
+        env:
+          SINGULARITY_API_KEY: ${{ secrets.SINGULARITY_API_KEY }}
+
+      - name: Open PR with changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bot/model-sync
+          delete-branch: true
+          commit-message: "chore: sync model catalog from /v1/models"
+          title: "chore: model catalog sync"
+          body: |
+            Automated refresh from `GET /v1/models` via `scripts/update-models.js`.
+            Review pricing/limit changes, new models (curate names + reasoning maps
+            in `patch.json` as needed), and deprecations before merging.
+          labels: model-sync
