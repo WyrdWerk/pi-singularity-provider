@@ -49,8 +49,9 @@ Fetch the catalog instead of hardcoding models; it is the source of truth for li
           "maximum_output_tokens": 384000,
           "default_output_tokens": 8192,
           "pricing": {
-            "input_per_million_usd": "0.140000000000",   // strings, 12 decimals,
-            "output_per_million_usd": "0.280000000000"   // USD per million tokens
+            "input_per_million_usd": "0.140000000000",        // strings, 12 decimals,
+            "cached_input_per_million_usd": "0.014000000000", // USD per million tokens;
+            "output_per_million_usd": "0.280000000000"        // cached rate may be absent
           }
         }
       ]
@@ -62,7 +63,7 @@ Fetch the catalog instead of hardcoding models; it is the source of truth for li
 Rules for interpreting it:
 
 - **Filter on `endpoint == "/v1/chat/completions"` exactly.** A model may also serve `/v1/responses` or `/v1/images/generations`; entries without a chat-completions capability (e.g. image-only models) are not chat models — do not register them as such.
-- **Pricing strings parse to floats** (USD per million tokens). Running cost estimate = `(input_tokens / 1_000_000 × input_rate) + (output_tokens / 1_000_000 × output_rate)`; see §5 for the authoritative figure.
+- **Pricing strings parse to floats** (USD per million tokens). Running cost estimate = `(uncached_input_tokens / 1_000_000 × input_rate) + (cached_input_tokens / 1_000_000 × cached_input_rate) + (output_tokens / 1_000_000 × output_rate)` — cached-token counts come from `usage.prompt_tokens_details.cached_tokens` when present; treat a missing cached rate as 0. See §5 for the authoritative figure.
 - **Refresh strategy** (what the pi extension does): ship/embed a snapshot so startup is instant, refresh from the API asynchronously on session start, cache the result on disk, and let live values win for `context_window`, `maximum_output_tokens`, and pricing while keeping your own display names and compatibility flags. Merge by model `id`; never duplicate.
 
 ## 3. Reasoning (thinking levels)
