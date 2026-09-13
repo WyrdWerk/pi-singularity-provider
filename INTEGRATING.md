@@ -120,7 +120,7 @@ Receipts resolve only for the owning account (404 otherwise). Poll briefly if `u
 
 Two complementary mechanisms:
 
-- **Running estimate:** accumulate each response's `usage` priced at the catalog rates from §2 — `(input_tokens / 1_000_000 × input_rate) + (output_tokens / 1_000_000 × output_rate)`. This is what a UI footer should show live.
+- **Running estimate:** accumulate each response's `usage` priced at the catalog rates from §2 — `(uncached_input_tokens / 1_000_000 × input_rate) + (cached_input_tokens / 1_000_000 × cached_input_rate) + (output_tokens / 1_000_000 × output_rate)`, where cached tokens come from `usage.prompt_tokens_details.cached_tokens` when present (subtract them from `input_tokens` for the uncached term). This is what a UI footer should show live.
 - **Authoritative:** the receipt's `total_cost_usd` (§4) — settled, gateway-computed, and the number to trust for reporting. It also captures gateway-side adjustments a local estimate can't see.
 
 ## 6. Checklist for agent implementers
