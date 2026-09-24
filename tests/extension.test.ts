@@ -14,8 +14,8 @@ import os from "os";
 import path from "path";
 import modelsData from "../models.json" with { type: "json" };
 
-const EMBEDDED_COUNT = (modelsData as { id: string }[]).length;
-const LIVE_ONLY_COUNT = 2; // new-model-x + new-model-y in LIVE_MODELS_RESPONSE
+const EMBEDDED = modelsData as { id: string }[];
+const EMBEDDED_COUNT = EMBEDDED.length;
 
 const LIVE_MODELS_RESPONSE = {
   object: "list",
@@ -144,6 +144,12 @@ const LIVE_MODELS_RESPONSE = {
     },
   ],
 };
+
+const EMBEDDED_IDS = new Set(EMBEDDED.map((m) => m.id));
+const LIVE_CHAT_IDS = LIVE_MODELS_RESPONSE.data
+  .filter((m) => m.capabilities.some((c) => c.endpoint === "/v1/chat/completions"))
+  .map((m) => m.id);
+const LIVE_ONLY_COUNT = LIVE_CHAT_IDS.filter((id) => !EMBEDDED_IDS.has(id)).length;
 
 const RECEIPT = {
   id: "rcpt_123",
