@@ -53,9 +53,14 @@ Note: `patch.json` carries the **reasoning entries for all reasoning-capable non
 → Run `node scripts/update-models.js` — it updates both `models.json` and the README table.
 
 ### Cut a release (publish to npm)
-1. `bun test` and `npx tsc --noEmit` must be green.
-2. Bump `version` in `package.json` (patch for docs/fixes, minor for behavior), commit, push.
-3. `npm publish` — requires an npm credential that satisfies write-2FA: a granular access token with **bypass-2FA** enabled (email-OTP logins cannot publish). The README in the npm listing renders from the published tarball, so doc changes need a release to show up on npm.
+CI publishes via **npm trusted publishing (OIDC)** — `.github/workflows/publish.yml`. No `NPM_TOKEN` secret.
+
+- Merge a `model-sync` PR → patch bump (if `package.json` version is already on npm) then `npm publish`.
+- **Actions → Publish → Run workflow** for code/docs releases (`patch` / `minor` / `major` / `skip`).
+
+One-time npmjs.com setup (package → Settings → Trusted Publisher): GitHub Actions, user `WyrdWerk`, repo `pi-singularity-provider`, workflow filename `publish.yml`. New publishers default to stage-only — also allow **`npm publish`**. Direct-publish granular tokens (bypass-2FA) are being removed in January 2027; do not add one unless OIDC is unavailable.
+
+Manual fallback: `bun test` and `npx tsc --noEmit` green, bump `version` in `package.json`, commit, `npm publish`. The README in the npm listing renders from the published tarball, so catalog/doc changes need a release to show up on npm.
 
 ## Provider Notes
 
