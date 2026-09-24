@@ -55,7 +55,7 @@ Note: `patch.json` carries the **reasoning entries for all reasoning-capable non
 ### Cut a release (publish to npm)
 CI publishes via **npm trusted publishing (OIDC)** — `.github/workflows/publish.yml`. No `NPM_TOKEN` secret.
 
-- Merge a `model-sync` PR → patch bump (if `package.json` version is already on npm) then `npm publish`.
+- Merge a `model-sync` PR → patch bump (if `package.json` version is already on npm) then `npm publish`. Sync Models enables auto-merge on that PR only (repo **Allow auto-merge** must be on); other PRs stay manual.
 - **Actions → Publish → Run workflow** for code/docs releases (`patch` / `minor` / `major` / `skip`).
 
 One-time npmjs.com setup (package → Settings → Trusted Publisher): GitHub Actions, user `WyrdWerk`, repo `pi-singularity-provider`, workflow filename `publish.yml`. New publishers default to stage-only — also allow **`npm publish`**. Direct-publish granular tokens (bypass-2FA) are being removed in January 2027; do not add one unless OIDC is unavailable.

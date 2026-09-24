@@ -30,6 +30,7 @@ jobs:
           SINGULARITY_API_KEY: ${{ secrets.SINGULARITY_API_KEY }}
 
       - name: Open PR with changes
+        id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           branch: bot/model-sync
@@ -38,6 +39,15 @@ jobs:
           title: "chore: model catalog sync"
           body: |
             Automated refresh from `GET /v1/models` via `scripts/update-models.js`.
-            Review pricing/limit changes, new models (curate names + reasoning maps
-            in `patch.json` as needed), and deprecations before merging.
+            Auto-merged; Publish then patch-bumps and ships to npm.
+            Pause this workflow if a new model needs a `patch.json` reasoning map first.
           labels: model-sync
+
+      # Repo setting "Allow auto-merge" must be on. This only targets the
+      # catalog PR just opened — it does not auto-merge other PRs.
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge "$PR" --squash --auto
