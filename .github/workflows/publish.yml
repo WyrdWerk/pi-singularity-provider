@@ -1,0 +1,88 @@
+name: Publish
+
+# Publishes pi-singularity-provider to npm via trusted publishing (OIDC).
+# No NPM_TOKEN secret. Configure the trusted publisher on npmjs.com first
+# (package → Settings → Trusted Publisher) or this job will 403.
+#
+# Triggers:
+#   - merge of a `model-sync` PR → patch bump (if needed) then publish
+#   - workflow_dispatch → optional bump then publish (code/docs releases)
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump before publish
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - skip
+        default: patch
+  pull_request:
+    types: [closed]
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write # required for npm OIDC
+
+jobs:
+  publish:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       contains(github.event.pull_request.labels.*.name, 'model-sync'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      # Do not set registry-url here: setup-node would write an empty
+      # NODE_AUTH_TOKEN into .npmrc and that shadows OIDC trusted publishing.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ensure npm CLI supports trusted publishing
+        run: npm install -g npm@11
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install, test, typecheck
+        run: |
+          bun install
+          bun test
+          npx tsc --noEmit
+
+      - name: Bump version if needed
+        env:
+          BUMP: ${{ github.event_name == 'workflow_dispatch' && inputs.bump || 'patch' }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          CURRENT="$(node -p "require('./package.json').version")"
+          PUBLISHED="$(npm view pi-singularity-provider version)"
+          echo "package.json=$CURRENT npm=$PUBLISHED bump=$BUMP"
+
+          if [ "$BUMP" = "skip" ]; then
+            if [ "$CURRENT" = "$PUBLISHED" ]; then
+              echo "::error::$CURRENT is already on npm; choose a bump or bump package.json first"
+              exit 1
+            fi
+          elif [ "$BUMP" = "patch" ] && [ "$CURRENT" != "$PUBLISHED" ]; then
+            echo "version already ahead of npm ($CURRENT > $PUBLISHED); not bumping"
+          else
+            npm version "$BUMP" -m "chore: release %s"
+            git push origin "HEAD:${{ github.event.repository.default_branch }}" --follow-tags
+          fi
+
+      - name: Publish to npm
+        run: npm publish
