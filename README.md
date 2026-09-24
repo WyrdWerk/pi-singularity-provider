@@ -92,10 +92,12 @@ Get your API key at [app.singularityapi.dev](https://app.singularityapi.dev) (AP
 | DeepSeek V4 Pro | 1M | ✅ | Text | 384K | $0.392 | $0.128 | $0.783 |
 | DeepSeek V4.1 Flash | 1M | ❌ | Text | 384K | $0.13 | $0.003 | $0.50 |
 | GLM 5.3 | 1M | ✅ | Text | 131K | $1.17 | $0.245 | $3.96 |
+| Gpt 6 Luna | 1M | ❌ | Text | 128K | $0.10 | $0.01 | $0.40 |
+| Gpt 6 Sol | 1M | ❌ | Text | 128K | $1.80 | $0.20 | $8.00 |
 | GPT-5.6 Luna | 1M | ✅ | Text | 128K | $0.18 | $0.02 | $1.10 |
 | GPT-5.6 Sol | 1M | ✅ | Text | 128K | $2.40 | $0.20 | $14.00 |
 | GPT-5.6 Terra | 1M | ✅ | Text | 128K | $1.80 | $0.20 | $10.00 |
-| GPT-6 Astra | 1M | ✅ | Text | 128K | $10.00 | $1.00 | $35.00 |
+| GPT-6 Astra | 1M | ✅ | Text | 128K | $8.00 | $1.00 | $30.00 |
 | Kimi K2.6 | 262K | ✅ | Text | 262K | $0.581 | $0.128 | $2.448 |
 | Kimi K2.7 Code | 262K | ✅ | Text | 262K | $0.639 | $0.152 | $3.15 |
 | Kimi K3 | 1M | ✅ | Text | 262K | $2.50 | $0.30 | $14.00 |
