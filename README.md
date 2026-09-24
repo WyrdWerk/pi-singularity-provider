@@ -15,7 +15,7 @@ _Live catalog metadata — context windows, output limits, exact pricing — plu
 
 ## Features
 
-- **Curated catalog** — 13 chat models across the DeepSeek, Kimi, GLM, and GPT families through one OpenAI-compatible endpoint
+- **Curated catalog** — 15 chat models across the DeepSeek, Kimi, GLM, and GPT families through one OpenAI-compatible endpoint
 - **Live metadata sync** — models, context windows, max output tokens, and exact per-token pricing refreshed from `GET /v1/models` on session start (stale-while-revalidate; zero-latency startup from embedded snapshot + disk cache)
 - **Reasoning models** — thinking levels for every reasoning-capable model, all gateway-verified: GPT-5.6 family (explicit `reasoning_effort`, tool-safe), DeepSeek/Kimi/GLM at low/medium/high, Kimi K3 and GPT-6 Astra at all five levels — see [Thinking Mode](#thinking-mode)
 - **Receipts** — every response carries an `x-singularity-receipt-id` header; `/singularity-receipt` shows the exact tokens, cost, and latency for any request

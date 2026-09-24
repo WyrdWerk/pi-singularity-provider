@@ -448,11 +448,19 @@ function updateReadme(models) {
 
   if (tableRegex.test(readme)) {
     readme = readme.replace(tableRegex, (match, header) => `${header}${newTable}\n\n`);
-    fs.writeFileSync(README_PATH, readme);
-    console.log('✓ Updated README.md');
   } else {
     console.warn('⚠ Could not find model table in "## Available Models" section');
   }
+
+  const countRegex = /(- \*\*Curated catalog\*\* — )\d+( chat models )/;
+  if (countRegex.test(readme)) {
+    readme = readme.replace(countRegex, `$1${models.length}$2`);
+  } else {
+    console.warn('⚠ Could not find curated catalog count in README features');
+  }
+
+  fs.writeFileSync(README_PATH, readme);
+  console.log(`✓ Updated README.md (${models.length} models)`);
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
