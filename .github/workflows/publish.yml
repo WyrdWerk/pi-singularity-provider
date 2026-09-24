@@ -77,8 +77,8 @@ jobs:
               echo "::error::$CURRENT is already on npm; choose a bump or bump package.json first"
               exit 1
             fi
-          elif [ "$BUMP" = "patch" ] && [ "$CURRENT" != "$PUBLISHED" ]; then
-            echo "version already ahead of npm ($CURRENT > $PUBLISHED); not bumping"
+          elif [ "$CURRENT" != "$PUBLISHED" ]; then
+            echo "version already ahead of npm ($CURRENT vs $PUBLISHED); not bumping"
           else
             npm version "$BUMP" -m "chore: release %s"
             git push origin "HEAD:${{ github.event.repository.default_branch }}" --follow-tags
