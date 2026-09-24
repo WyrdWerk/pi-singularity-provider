@@ -13,9 +13,31 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import modelsData from "../models.json" with { type: "json" };
+import customModelsData from "../custom-models.json" with { type: "json" };
+import deprecatedData from "../deprecated-models.json" with { type: "json" };
 
-const EMBEDDED = modelsData as { id: string }[];
-const EMBEDDED_COUNT = EMBEDDED.length;
+// Same 14-day grace window as index.ts — keep in lockstep if that TTL changes.
+const DEPRECATED_MODEL_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+
+function activeDeprecatedIds(): string[] {
+  const now = Date.now();
+  const ids: string[] = [];
+  for (const entry of Object.values(deprecatedData as Record<string, { id?: string; deprecatedAt?: string }>)) {
+    if (!entry?.id) continue;
+    const removedAt = Date.parse(entry.deprecatedAt ?? "");
+    if (Number.isNaN(removedAt) || now - removedAt > DEPRECATED_MODEL_TTL_MS) continue;
+    ids.push(entry.id);
+  }
+  return ids;
+}
+
+// Runtime catalog = models.json ∪ custom-models.json ∪ in-grace deprecated models.
+const STALE_IDS = new Set([
+  ...(modelsData as { id: string }[]).map((m) => m.id),
+  ...(customModelsData as { id: string }[]).map((m) => m.id),
+  ...activeDeprecatedIds(),
+]);
+const STALE_COUNT = STALE_IDS.size;
 
 const LIVE_MODELS_RESPONSE = {
   object: "list",
@@ -145,11 +167,10 @@ const LIVE_MODELS_RESPONSE = {
   ],
 };
 
-const EMBEDDED_IDS = new Set(EMBEDDED.map((m) => m.id));
 const LIVE_CHAT_IDS = LIVE_MODELS_RESPONSE.data
   .filter((m) => m.capabilities.some((c) => c.endpoint === "/v1/chat/completions"))
   .map((m) => m.id);
-const LIVE_ONLY_COUNT = LIVE_CHAT_IDS.filter((id) => !EMBEDDED_IDS.has(id)).length;
+const LIVE_COUNT = new Set([...STALE_IDS, ...LIVE_CHAT_IDS]).size;
 
 const RECEIPT = {
   id: "rcpt_123",
@@ -268,7 +289,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(reg.config.api).toBe("openai-completions");
 
     const models = reg.config.models;
-    expect(models).toHaveLength(EMBEDDED_COUNT);
+    expect(models).toHaveLength(STALE_COUNT);
 
     const luna = models.find((m: any) => m.id === "gpt-5.6-luna");
     expect(luna).toMatchObject({
@@ -356,8 +377,8 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(pi.registrations).toHaveLength(2);
     const models = pi.registrations[1].config.models;
 
-    // embedded + 2 live-only models; deepseek-v4-flash merged, not duplicated
-    expect(models).toHaveLength(EMBEDDED_COUNT + LIVE_ONLY_COUNT);
+    // stale catalog + live-only chat models; overlapping ids merged, not duplicated
+    expect(models).toHaveLength(LIVE_COUNT);
     expect(models.filter((m: any) => m.id === "deepseek-v4-flash")).toHaveLength(1);
 
     const flash = models.find((m: any) => m.id === "deepseek-v4-flash");
@@ -479,7 +500,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     const models = pi2.registrations[0].config.models;
     expect(models.find((m: any) => m.id === "new-model-x")).toBeTruthy();
     expect(models.find((m: any) => m.id === "deepseek-v4-flash").contextWindow).toBe(777777);
-    expect(models).toHaveLength(EMBEDDED_COUNT + LIVE_ONLY_COUNT);
+    expect(models).toHaveLength(LIVE_COUNT);
   });
 
   test("keeps the embedded catalog when no API key is configured", async () => {
@@ -491,7 +512,7 @@ describe("provider registration (stale-while-revalidate)", () => {
 
     // No key → no live fetch possible → no re-registration
     expect(pi.registrations).toHaveLength(1);
-    expect(pi.registrations[0].config.models).toHaveLength(EMBEDDED_COUNT);
+    expect(pi.registrations[0].config.models).toHaveLength(STALE_COUNT);
   });
 
   test("keeps serving stale models when the live fetch fails", async () => {
@@ -503,7 +524,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     await flushMicrotasks();
 
     expect(pi.registrations).toHaveLength(2);
-    expect(pi.registrations[1].config.models).toHaveLength(EMBEDDED_COUNT);
+    expect(pi.registrations[1].config.models).toHaveLength(STALE_COUNT);
   });
 
   test("aborts a superseded revalidation on shutdown", async () => {
