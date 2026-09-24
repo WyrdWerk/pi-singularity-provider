@@ -12,6 +12,10 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import modelsData from "../models.json" with { type: "json" };
+
+const EMBEDDED_COUNT = (modelsData as { id: string }[]).length;
+const LIVE_ONLY_COUNT = 2; // new-model-x + new-model-y in LIVE_MODELS_RESPONSE
 
 const LIVE_MODELS_RESPONSE = {
   object: "list",
@@ -258,7 +262,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(reg.config.api).toBe("openai-completions");
 
     const models = reg.config.models;
-    expect(models).toHaveLength(13);
+    expect(models).toHaveLength(EMBEDDED_COUNT);
 
     const luna = models.find((m: any) => m.id === "gpt-5.6-luna");
     expect(luna).toMatchObject({
@@ -346,8 +350,8 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(pi.registrations).toHaveLength(2);
     const models = pi.registrations[1].config.models;
 
-    // 13 embedded + 2 live-only models; deepseek-v4-flash merged, not duplicated
-    expect(models).toHaveLength(15);
+    // embedded + 2 live-only models; deepseek-v4-flash merged, not duplicated
+    expect(models).toHaveLength(EMBEDDED_COUNT + LIVE_ONLY_COUNT);
     expect(models.filter((m: any) => m.id === "deepseek-v4-flash")).toHaveLength(1);
 
     const flash = models.find((m: any) => m.id === "deepseek-v4-flash");
@@ -469,7 +473,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     const models = pi2.registrations[0].config.models;
     expect(models.find((m: any) => m.id === "new-model-x")).toBeTruthy();
     expect(models.find((m: any) => m.id === "deepseek-v4-flash").contextWindow).toBe(777777);
-    expect(models).toHaveLength(15);
+    expect(models).toHaveLength(EMBEDDED_COUNT + LIVE_ONLY_COUNT);
   });
 
   test("keeps the embedded catalog when no API key is configured", async () => {
@@ -481,7 +485,7 @@ describe("provider registration (stale-while-revalidate)", () => {
 
     // No key → no live fetch possible → no re-registration
     expect(pi.registrations).toHaveLength(1);
-    expect(pi.registrations[0].config.models).toHaveLength(13);
+    expect(pi.registrations[0].config.models).toHaveLength(EMBEDDED_COUNT);
   });
 
   test("keeps serving stale models when the live fetch fails", async () => {
@@ -493,7 +497,7 @@ describe("provider registration (stale-while-revalidate)", () => {
     await flushMicrotasks();
 
     expect(pi.registrations).toHaveLength(2);
-    expect(pi.registrations[1].config.models).toHaveLength(13);
+    expect(pi.registrations[1].config.models).toHaveLength(EMBEDDED_COUNT);
   });
 
   test("aborts a superseded revalidation on shutdown", async () => {
