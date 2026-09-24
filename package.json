@@ -31,8 +31,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wyrdwerk/pi-singularity-provider.git"
+    "url": "https://github.com/WyrdWerk/pi-singularity-provider.git"
   },
+  "files": [
+    "index.ts",
+    "models.json",
+    "custom-models.json",
+    "deprecated-models.json",
+    "patch.json",
+    "INTEGRATING.md",
+    "LICENSE",
+    "README.md"
+  ],
   "pi": {
     "extensions": [
       "./index.ts"
