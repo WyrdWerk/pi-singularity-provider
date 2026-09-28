@@ -78,3 +78,7 @@ Manual fallback: `bun test` and `npx tsc --noEmit` green, bump `version` in `pac
 - **Never edit `models.json`** — edit `patch.json` instead.
 - **Never edit the README model table** — run the update script instead.
 - `patch.json` and `custom-models.json` are the source files you should modify.
+
+## Amp environment: global skills
+
+Specifically within Amp environments, reusable global skills may be available under `~/.config/agents/skills/`. Before relevant work, inspect that directory for an applicable skill. When using one, read its complete `SKILL.md` and all referenced bundled resources before proceeding.
