@@ -9,7 +9,10 @@
       "xhigh": null,
       "max": null
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "deepseek-v4-flash": {
     "reasoning": true,
@@ -21,7 +24,10 @@
       "xhigh": null,
       "max": null
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "deepseek-v4-flash-0731": {
     "name": "DeepSeek V4 Flash 0731",
@@ -34,7 +40,10 @@
       "xhigh": null,
       "max": null
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "deepseek-v4.1-flash": {
     "name": "DeepSeek V4.1 Flash"
@@ -49,7 +58,10 @@
       "xhigh": null,
       "max": null
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "kimi-k2.6": {
     "reasoning": true,
@@ -61,7 +73,10 @@
       "xhigh": null,
       "max": null
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "kimi-k2.7-code": {
     "reasoning": true,
@@ -73,7 +88,10 @@
       "xhigh": null,
       "max": null
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "kimi-k3": {
     "reasoning": true,
@@ -85,7 +103,10 @@
       "xhigh": "xhigh",
       "max": "max"
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "glm-5.3": {
     "name": "GLM 5.3",
@@ -98,7 +119,10 @@
       "xhigh": null,
       "max": null
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
   },
   "gpt-6-astra": {
     "name": "GPT-6 Astra",
@@ -111,6 +135,108 @@
       "xhigh": "xhigh",
       "max": "max"
     },
-    "compat": { "thinkingFormat": "openai", "supportsReasoningEffort": true }
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
+  },
+  "gpt-6-luna": {
+    "name": "GPT-6 Luna",
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": "xhigh",
+      "max": "max"
+    },
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
+  },
+  "gpt-6-sol": {
+    "name": "GPT-6 Sol",
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": "xhigh",
+      "max": "max"
+    },
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
+  },
+  "gpt-6.1-sol": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": "xhigh",
+      "max": "max"
+    },
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
+  },
+  "claude-sonnet-5-5": {
+    "name": "Claude Sonnet 5.5",
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": "xhigh",
+      "max": "max"
+    },
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
+  },
+  "claude-opus-5-5": {
+    "name": "Claude Opus 5.5",
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": "xhigh",
+      "max": "max"
+    },
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
+  },
+  "claude-fable-5.1": {
+    "name": "Claude Fable 5.1",
+    "reasoning": true,
+    "thinkingLevelMap": {
+      "minimal": null,
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "xhigh": "xhigh",
+      "max": "max"
+    },
+    "compat": {
+      "thinkingFormat": "openai",
+      "supportsReasoningEffort": true
+    }
+  },
+  "claude-haiku-5-5": {
+    "name": "Claude Haiku 5.5"
   }
 }

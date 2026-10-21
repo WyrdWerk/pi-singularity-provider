@@ -4,8 +4,8 @@
  * Registers SingularityAPI (api.singularityapi.dev) as a custom provider.
  * Base URL: https://api.singularityapi.dev/v1 (OpenAI-compatible)
  *
- * SingularityAPI is an OpenAI-compatible gateway serving DeepSeek, Kimi, and
- * GPT models with per-request receipts: every response carries an
+ * SingularityAPI is an OpenAI-compatible gateway serving DeepSeek, Kimi, GLM,
+ * GPT, and Claude models with per-request receipts: every response carries an
  * `x-singularity-receipt-id` header that resolves to exact tokens, cost, and
  * latency via GET /v1/receipts/{id}.
  *

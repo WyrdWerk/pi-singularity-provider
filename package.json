@@ -1,7 +1,7 @@
 {
   "name": "pi-singularity-provider",
-  "version": "1.0.4",
-  "description": "SingularityAPI provider extension for pi - DeepSeek, Kimi, and GPT models with live catalog metadata (context, limits, exact pricing) and per-request receipts",
+  "version": "1.0.5",
+  "description": "SingularityAPI provider extension for pi - DeepSeek, Kimi, GLM, GPT, and Claude models with live catalog metadata (context, limits, exact pricing) and per-request receipts",
   "type": "module",
   "main": "index.ts",
   "scripts": {
@@ -21,7 +21,9 @@
     "llm",
     "deepseek",
     "kimi",
+    "glm",
     "gpt",
+    "claude",
     "receipts"
   ],
   "author": "WyrdWerk",

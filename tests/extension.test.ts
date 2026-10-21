@@ -337,9 +337,9 @@ describe("provider registration (stale-while-revalidate)", () => {
       expect(patched.compat.supportsReasoningEffort).toBe(true);
     }
 
-    // Verified to think at ALL five on-levels (2026-09-13 probe): xhigh and
-    // max are exposed, off still omitted (astra 400s on reasoning_effort:"none").
-    for (const id of ["kimi-k3", "gpt-6-astra"]) {
+    // Verified to think at ALL five on-levels: xhigh and max are exposed,
+    // off still omitted (gpt-6-astra / gpt-6.1-sol 400 on reasoning_effort:"none").
+    for (const id of ["kimi-k3", "gpt-6-astra", "gpt-6-luna", "gpt-6-sol", "gpt-6.1-sol", "claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5.1"]) {
       const extended = models.find((m: any) => m.id === id);
       expect(extended.reasoning).toBe(true);
       expect(extended.thinkingLevelMap).toEqual({
@@ -358,12 +358,21 @@ describe("provider registration (stale-while-revalidate)", () => {
     expect(models.find((m: any) => m.id === "deepseek-v4.1-flash").name).toBe("DeepSeek V4.1 Flash");
     expect(models.find((m: any) => m.id === "glm-5.3").name).toBe("GLM 5.3");
     expect(models.find((m: any) => m.id === "gpt-6-astra").name).toBe("GPT-6 Astra");
+    expect(models.find((m: any) => m.id === "gpt-6-luna").name).toBe("GPT-6 Luna");
+    expect(models.find((m: any) => m.id === "gpt-6-sol").name).toBe("GPT-6 Sol");
+    expect(models.find((m: any) => m.id === "gpt-6.1-sol").name).toBe("GPT-6.1 Sol");
+    expect(models.find((m: any) => m.id === "claude-haiku-5-5").name).toBe("Claude Haiku 5.5");
+    expect(models.find((m: any) => m.id === "claude-sonnet-5-5").name).toBe("Claude Sonnet 5.5");
+    expect(models.find((m: any) => m.id === "claude-opus-5-5").name).toBe("Claude Opus 5.5");
+    expect(models.find((m: any) => m.id === "claude-fable-5.1").name).toBe("Claude Fable 5.1");
 
-    // deepseek-v4.1-flash accepts reasoning_effort at every level but never
-    // returns a thinking channel (probe) — registered non-reasoning.
-    const v41 = models.find((m: any) => m.id === "deepseek-v4.1-flash");
-    expect(v41.reasoning).toBe(false);
-    expect(v41.thinkingLevelMap).toBeUndefined();
+    // deepseek-v4.1-flash and claude-haiku-5-5 accept reasoning_effort at every
+    // level but never return a thinking channel (probe) — registered non-reasoning.
+    for (const id of ["deepseek-v4.1-flash", "claude-haiku-5-5"]) {
+      const silent = models.find((m: any) => m.id === id);
+      expect(silent.reasoning).toBe(false);
+      expect(silent.thinkingLevelMap).toBeUndefined();
+    }
   });
 
   test("revalidates on session_start: live limits/pricing win, curation kept, cache written", async () => {
