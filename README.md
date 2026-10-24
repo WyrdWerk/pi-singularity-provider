@@ -15,7 +15,7 @@ _Live catalog metadata — context windows, output limits, exact pricing — plu
 
 ## Features
 
-- **Curated catalog** — 20 chat models across the DeepSeek, Kimi, GLM, GPT, and Claude families through one OpenAI-compatible endpoint
+- **Curated catalog** — 21 chat models across the DeepSeek, Kimi, GLM, GPT, and Claude families through one OpenAI-compatible endpoint
 - **Live metadata sync** — models, context windows, max output tokens, and exact per-token pricing refreshed from `GET /v1/models` on session start (stale-while-revalidate; zero-latency startup from embedded snapshot + disk cache)
 - **Reasoning models** — thinking levels for every reasoning-capable model, all gateway-verified: GPT-5.6 family (explicit `reasoning_effort`, tool-safe), DeepSeek/Kimi/GLM at low/medium/high, Kimi K3 / GPT-6 family / Claude Sonnet·Opus·Fable at all five levels — see [Thinking Mode](#thinking-mode)
 - **Receipts** — every response carries an `x-singularity-receipt-id` header; `/singularity-receipt` shows the exact tokens, cost, and latency for any request
@@ -95,6 +95,7 @@ Get your API key at [app.singularityapi.dev](https://app.singularityapi.dev) (AP
 | DeepSeek V4 Flash 0731 | 1M | ✅ | Text | 384K | $0.20 | $0.007 | $0.50 |
 | DeepSeek V4 Pro | 1M | ✅ | Text | 384K | $0.392 | $0.128 | $0.783 |
 | DeepSeek V4.1 Flash | 1M | ❌ | Text | 384K | $0.13 | $0.003 | $0.50 |
+| Deepseek V4.1 Flash 1017 | 1M | ❌ | Text | 393K | $0.09 | $0.002 | $0.36 |
 | GLM 5.3 | 1M | ✅ | Text | 131K | $1.17 | $0.245 | $3.96 |
 | GPT-5.6 Luna | 1M | ✅ | Text | 128K | $0.18 | $0.02 | $1.10 |
 | GPT-5.6 Sol | 1M | ✅ | Text | 128K | $2.40 | $0.20 | $14.00 |

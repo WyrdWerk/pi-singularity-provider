@@ -138,6 +138,27 @@
     }
   },
   {
+    "id": "deepseek-v4.1-flash-1017",
+    "name": "Deepseek V4.1 Flash 1017",
+    "reasoning": false,
+    "input": [
+      "text"
+    ],
+    "cost": {
+      "input": 0.09,
+      "output": 0.36,
+      "cacheRead": 0.0018,
+      "cacheWrite": 0
+    },
+    "contextWindow": 1048576,
+    "maxTokens": 393216,
+    "compat": {
+      "maxTokensField": "max_completion_tokens",
+      "supportsDeveloperRole": false,
+      "supportsStore": false
+    }
+  },
+  {
     "id": "kimi-k3",
     "name": "Kimi K3",
     "reasoning": false,
